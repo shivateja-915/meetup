@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/((?!assets/|canvaskit/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
