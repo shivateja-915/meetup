@@ -41,49 +41,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
       if (!mounted) return;
 
+      // Show verification dialog instead of navigating
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: const Text('Verify your email'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.mark_email_read_rounded,
-                    color: AppColors.primary, size: 48),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'We\'ve sent a verification link to your email. Please check your inbox (and spam folder) to complete your registration.',
-                textAlign: TextAlign.center,
-              ),
+              Icon(Icons.mark_email_read_rounded, color: AppColors.primary),
+              SizedBox(width: 12),
+              Text('Verify Email'),
             ],
+          ),
+          content: const Text(
+            'We have sent a verification link to your email. Please check your inbox (and spam folder) to complete your registration.',
+            style: TextStyle(fontSize: 15),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close dialog
-                Navigator.of(this.context).pop(); // Go back to login
+                Navigator.of(context).pop(); // Go back to Login
               },
-              child: const Text('OK',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text('Back to Login', 
+                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
             ),
           ],
         ),
       );
     } catch (e) {
       if (!mounted) return;
+      String errorMessage = 'Failed to join group';
+      if (e.toString().contains('duplicate key')) {
+        errorMessage = 'You are already a member of this group!';
+      } else {
+        errorMessage = e.toString();
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Sign up failed: ${e.toString()}'),
+          content: Text(errorMessage),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           shape:

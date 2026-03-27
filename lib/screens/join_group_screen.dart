@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/supabase_service.dart';
+import 'group_detail_screen.dart';
 
 class JoinGroupScreen extends StatefulWidget {
   const JoinGroupScreen({super.key});
@@ -41,22 +42,30 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Successfully joined ${group['name']}!'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => GroupDetailScreen(
+              groupId: group['id'],
+              groupName: group['name'],
+            ),
           ),
         );
-        Navigator.pop(context, true);
       }
     } catch (e) {
       if (!mounted) return;
+      String errorMessage = 'Failed to join group';
+      
+      // Check for specific Supabase/Postgres error messages
+      if (e.toString().contains('duplicate key')) {
+        errorMessage = 'You are already a member of this group!';
+      } else {
+        errorMessage = e.toString();
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to join group: ${e.toString()}'),
+          content: Text(errorMessage),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           shape:
