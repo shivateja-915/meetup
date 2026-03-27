@@ -105,6 +105,18 @@ class SupabaseService {
   static Future<Map<String, dynamic>?> joinGroup(String inviteCode) async {
     final userId = currentUser!.id;
 
+    // Ensure profile exists before joining (Fixes Foreign Key constraint error)
+    final profile = await getProfile(userId);
+    if (profile == null) {
+      // Create missing profile (fallback for users who signed up but profile insert failed or was delayed)
+      // Note: We don't have the full name here, so we use email as a fallback or ask user.
+      // For now, using a placeholder or the user's email if available.
+      await client.from('profiles').insert({
+        'id': userId,
+        'full_name': currentUser?.email?.split('@')[0] ?? 'User',
+      });
+    }
+
     final group = await client
         .from('groups')
         .select()
