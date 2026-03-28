@@ -51,6 +51,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     _tabController = TabController(length: 3, vsync: this);
     _loadData();
     _subscribeToMessages();
+    
+    // Pre-load sounds to help with Web interaction
+    _audioPlayer.setSource(AssetSource('assets/sounds/send.mp3')).catchError((e) => debugPrint('Error pre-loading send sound: $e'));
   }
 
   @override
@@ -59,6 +62,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     _messageController.dispose();
     _scrollController.dispose();
     _messageChannel?.unsubscribe();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -111,7 +115,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         // Play notification sound only for messages from others
         if (newMessage['sender_id'] != currentUserId) {
           try {
-            await _audioPlayer.play(AssetSource('sounds/receive.mp3'));
+            await _audioPlayer.play(AssetSource('assets/sounds/receive.mp3'));
           } catch (e) {
             debugPrint('Error playing receive sound: $e');
           }
@@ -148,9 +152,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     
     // Play pop sound
     try {
-      await _audioPlayer.play(AssetSource('sounds/send.mp3'));
+      await _audioPlayer.play(AssetSource('assets/sounds/send.mp3'));
     } catch (e) {
-      debugPrint('Error playing sound: $e');
+      debugPrint('Error playing send sound: $e');
     }
 
     try {
