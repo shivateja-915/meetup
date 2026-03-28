@@ -55,7 +55,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ],
           ),
           content: const Text(
-            'Successfully email verified',
+            'email verified',
             style: TextStyle(fontSize: 15),
           ),
           actions: [
