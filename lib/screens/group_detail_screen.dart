@@ -104,9 +104,19 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   }
 
   void _subscribeToMessages() {
+    final currentUserId = SupabaseService.currentUser?.id;
     _messageChannel = SupabaseService.subscribeToMessages(
       widget.groupId,
       (newMessage) async {
+        // Play notification sound only for messages from others
+        if (newMessage['sender_id'] != currentUserId) {
+          try {
+            await _audioPlayer.play(AssetSource('sounds/receive.mp3'));
+          } catch (e) {
+            debugPrint('Error playing receive sound: $e');
+          }
+        }
+
         // Fetch the full message with profile info
         final messages = await SupabaseService.getMessages(widget.groupId);
         if (mounted) {
