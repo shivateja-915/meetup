@@ -10,6 +10,7 @@ import '../widgets/chat_bubble.dart';
 import 'schedule_meetup_screen.dart';
 import 'meetup_detail_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 
 class GroupDetailScreen extends StatefulWidget {
   final String groupId;
@@ -52,8 +53,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     _loadData();
     _subscribeToMessages();
     
-    // Pre-load sounds to help with Web interaction
-    _audioPlayer.setSource(AssetSource('assets/sounds/send.mp3')).catchError((e) => debugPrint('Error pre-loading send sound: $e'));
+    // Pre-load sounds using direct URLs for Web reliability
+    const baseUrl = 'https://meetup-eosin.vercel.app/assets/sounds';
+    _audioPlayer.setSource(UrlSource('$baseUrl/send.mp3')).catchError((e) => debugPrint('Error pre-loading send sound: $e'));
   }
 
   @override
@@ -115,7 +117,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         // Play notification sound only for messages from others
         if (newMessage['sender_id'] != currentUserId) {
           try {
-            await _audioPlayer.play(AssetSource('assets/sounds/receive.mp3'));
+            await _audioPlayer.play(UrlSource('https://meetup-eosin.vercel.app/assets/sounds/receive.mp3'));
           } catch (e) {
             debugPrint('Error playing receive sound: $e');
           }
@@ -152,7 +154,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     
     // Play pop sound
     try {
-      await _audioPlayer.play(AssetSource('assets/sounds/send.mp3'));
+      await _audioPlayer.play(UrlSource('https://meetup-eosin.vercel.app/assets/sounds/send.mp3'));
     } catch (e) {
       debugPrint('Error playing send sound: $e');
     }
