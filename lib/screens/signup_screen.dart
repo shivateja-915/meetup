@@ -55,7 +55,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ],
           ),
           content: const Text(
-            'We have sent a verification link to your email. Please check your inbox (and spam folder) to complete your registration.',
+            'Successfully email verified',
             style: TextStyle(fontSize: 15),
           ),
           actions: [
