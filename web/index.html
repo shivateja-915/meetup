@@ -42,5 +42,14 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    window.playChatSound = function(url) {
+      console.log("Playing sound: " + url);
+      var audio = new Audio(url);
+      audio.play().catch(function(error) {
+        console.error("Native play failed: ", error);
+      });
+    };
+  </script>
 </body>
 </html>
