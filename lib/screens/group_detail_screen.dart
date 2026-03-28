@@ -9,6 +9,7 @@ import '../widgets/meetup_card.dart';
 import '../widgets/chat_bubble.dart';
 import 'schedule_meetup_screen.dart';
 import 'meetup_detail_screen.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class GroupDetailScreen extends StatefulWidget {
   final String groupId;
@@ -41,6 +42,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
 
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
+  final _audioPlayer = AudioPlayer();
   RealtimeChannel? _messageChannel;
 
   @override
@@ -118,8 +120,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
+        // In reverse: true list, 0 is the bottom (newest)
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          0,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -132,11 +135,21 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     if (text.isEmpty) return;
 
     _messageController.clear();
+    
+    // Play pop sound
+    try {
+      await _audioPlayer.play(AssetSource('sounds/send.mp3'));
+    } catch (e) {
+      debugPrint('Error playing sound: $e');
+    }
+
     try {
       await SupabaseService.sendMessage(
         groupId: widget.groupId,
         content: text,
       );
+      // Immediately scroll to bottom (newest)
+      _scrollToBottom();
     } catch (e) {
       // Handle error
     }
@@ -525,18 +538,21 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   itemCount: _messages.length,
                   itemBuilder: (context, index) {
-                    // With reverse: true, index 0 is the last element
+                    // In reverse: true, earlier index is later message (bottom)
+                    // Index 0 is newest (bottom)
                     final msg = _messages[_messages.length - 1 - index];
                     final isMe = msg['sender_id'] == currentUserId;
                     
                     final msgDate = DateTime.parse(msg['created_at']).toLocal();
                     bool showDate = false;
-                    if (index == 0) {
+                    
+                    // Show date if it's the oldest message (last index) or day changed from next older message
+                    if (index == _messages.length - 1) {
                       showDate = true;
                     } else {
-                      final prevMsg = _messages[index - 1];
-                      final prevDate = DateTime.parse(prevMsg['created_at']).toLocal();
-                      if (msgDate.year != prevDate.year || msgDate.month != prevDate.month || msgDate.day != prevDate.day) {
+                      final olderMsg = _messages[_messages.length - 1 - (index + 1)];
+                      final olderDate = DateTime.parse(olderMsg['created_at']).toLocal();
+                      if (msgDate.year != olderDate.year || msgDate.month != olderDate.month || msgDate.day != olderDate.day) {
                          showDate = true;
                       }
                     }
